@@ -1,0 +1,22 @@
+==============================================================================
+TUNEGEN REPORT: Maruti Suzuki Swift K12 | Delhi | goal: balanced | budget INR 8,000
+Conditions: 32.0C, 40% humidity, 0.0mm rain, 990 hPa, air density 0.916 of sea level (source: OFFLINE_DEFAULT, confidence: low (typical climate, no live data))
+Knowledge rules fired: none
+WARNING: the car is under warranty. Parts that may void it were excluded.
+
+Best single part by utility: Iridium Spark Plugs
+Best bundle (one per category): total INR 5,200, adjusted gain 3.5 hp
+  + Iridium Spark Plugs [ignition] INR 2,400, +1.5 hp, U=0.7017
+      search: https://www.amazon.in/s?k=Iridium+Spark+Plugs+Maruti+Suzuki+Swift+K12
+  + Performance Air Filter [filter] INR 2,800, +2.0 hp, U=0.5812
+      search: https://www.amazon.in/s?k=Performance+Air+Filter+Maruti+Suzuki+Swift+K12
+
+Excluded by hard constraints:
+  x Cat-back Exhaust X: over budget (14500 > 8000)
+  x Free-flow Exhaust Y: over budget (9800 > 8000)
+  x Piggyback ECU Chip: over budget (18000 > 8000)
+  x Plug-in Tuner Module: over budget (11000 > 8000)
+  x Race ECU Remap (not BS6): not BS6 / road legal
+  x Intake for Honda City: does not fit this car
+
+Note: part specs are illustrative sample data and links are marketplace SEARCH links, not verified listings.

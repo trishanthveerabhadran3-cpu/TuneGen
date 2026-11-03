@@ -1,0 +1,63 @@
+*** DEMO MODE: weather comes from a local SIMULATED server, not the real internet ***
+[t01] DESIRE    assess_conditions: INACTIVE -> ACTIVE
+[t01] DESIRE    assess_conditions: ACTIVE -> PURSUING
+[t01] INTENTION ADOPT 'live_weather_assessment': fetch_live_weather > parse_and_validate > apply_knowledge_rules
+[t01] ACT       live_weather_assessment 1/3: fetch_live_weather
+[t02] ACT       live_weather_assessment 2/3: parse_and_validate
+[t03] ACT       live_weather_assessment 3/3: apply_knowledge_rules
+[t03] INTENTION COMPLETED 'live_weather_assessment'
+[t04] DESIRE    assess_conditions: PURSUING -> ACHIEVED
+[t04] DESIRE    recommend_equipment: INACTIVE -> ACTIVE
+[t04] DESIRE    recommend_equipment: ACTIVE -> PURSUING
+[t04] INTENTION ADOPT 'utility_optimised_recommendation': apply_hard_constraints > score_utility > select_optimum_and_bundle > attach_search_links
+[t04] ACT       utility_optimised_recommendation 1/4: apply_hard_constraints
+[t05] EVENT     environment update: warranty_active: False -> True
+[t05] DESIRE    warn_warranty_risk: INACTIVE -> ACTIVE
+[t05] INTENTION ABANDON 'utility_optimised_recommendation' at step 1/4: pre-empted by higher priority desire 'warn_warranty_risk'
+[t05] DESIRE    recommend_equipment: PURSUING -> SUSPENDED
+[t05] DESIRE    warn_warranty_risk: ACTIVE -> PURSUING
+[t05] INTENTION ADOPT 'send_warranty_warning': warn_user
+[t05] ACT       send_warranty_warning 1/1: warn_user
+[t05] INTENTION COMPLETED 'send_warranty_warning'
+[t06] DESIRE    warn_warranty_risk: PURSUING -> ACHIEVED
+[t06] DESIRE    recommend_equipment: SUSPENDED -> PURSUING
+[t06] INTENTION ADOPT 'utility_optimised_recommendation': apply_hard_constraints > score_utility > select_optimum_and_bundle > attach_search_links
+[t06] ACT       utility_optimised_recommendation 1/4: apply_hard_constraints
+[t07] ACT       utility_optimised_recommendation 2/4: score_utility
+[t08] EVENT     environment update: budget_inr: 20000.0 -> 8000.0
+[t08] INTENTION ABANDON 'utility_optimised_recommendation' at step 2/4: assumptions broken: budget_inr changed
+[t08] DESIRE    recommend_equipment: PURSUING -> SUSPENDED
+[t08] DESIRE    recommend_equipment: SUSPENDED -> PURSUING
+[t08] INTENTION ADOPT 'utility_optimised_recommendation': apply_hard_constraints > score_utility > select_optimum_and_bundle > attach_search_links
+[t08] ACT       utility_optimised_recommendation 1/4: apply_hard_constraints
+[t09] ACT       utility_optimised_recommendation 2/4: score_utility
+[t10] ACT       utility_optimised_recommendation 3/4: select_optimum_and_bundle
+[t11] ACT       utility_optimised_recommendation 4/4: attach_search_links
+[t11] INTENTION COMPLETED 'utility_optimised_recommendation'
+[t12] DESIRE    recommend_equipment: PURSUING -> ACHIEVED
+[t12] DONE      all desires achieved
+
+==============================================================================
+TUNEGEN REPORT: Maruti Suzuki Swift K12 | Chennai | goal: balanced | budget INR 8,000
+Conditions: 27.0C, 93% humidity, 6.5mm rain, 1006 hPa, air density 0.941 of sea level (source: SIMULATED, confidence: medium (simulated feed))
+Knowledge rules fired: R_WET
+  - Rain or waterlogging: open element intakes risk water ingestion and are removed from the plan.
+WARNING: the car is under warranty. Parts that may void it were excluded.
+
+Best single part by utility: Iridium Spark Plugs
+Best bundle (one per category): total INR 5,200, adjusted gain 3.5 hp
+  + Iridium Spark Plugs [ignition] INR 2,400, +1.5 hp, U=0.7017
+      search: https://www.amazon.in/s?k=Iridium+Spark+Plugs+Maruti+Suzuki+Swift+K12
+  + Performance Air Filter [filter] INR 2,800, +2.0 hp, U=0.6412
+      search: https://www.amazon.in/s?k=Performance+Air+Filter+Maruti+Suzuki+Swift+K12
+
+Excluded by hard constraints:
+  x Cold Air Intake A: avoided by live conditions: ['water_ingestion_risk']
+  x Cat-back Exhaust X: over budget (14500 > 8000)
+  x Free-flow Exhaust Y: over budget (9800 > 8000)
+  x Piggyback ECU Chip: over budget (18000 > 8000)
+  x Plug-in Tuner Module: over budget (11000 > 8000)
+  x Race ECU Remap (not BS6): not BS6 / road legal
+  x Intake for Honda City: does not fit this car
+
+Note: part specs are illustrative sample data and links are marketplace SEARCH links, not verified listings.

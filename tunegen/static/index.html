@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>TuneGen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --mist:#EDF0F2; --paper:#FAFBFC; --ink:#0F1B26; --steel:#5B6B7F; --line:#D5DBE1;
+  --petrol:#0E5A5A; --petrol-soft:#D6E8E6; --amber:#E8A317; --amber-soft:#F7E8C4; --red:#C8372D; --red-soft:#F6DAD7;
+  --display:"Bricolage Grotesque","Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --text:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--mist);color:var(--ink);font:16px/1.55 var(--text)}
+:focus-visible{outline:3px solid var(--petrol);outline-offset:2px;border-radius:4px}
+.shell{max-width:1240px;margin:0 auto;padding:28px 20px 64px;display:grid;grid-template-columns:320px minmax(0,1fr);gap:44px;align-items:start}
+@media(max-width:940px){.shell{grid-template-columns:1fr;gap:28px}}
+
+/* ---------- control rail ---------- */
+.rail{position:sticky;top:20px}
+@media(max-width:940px){.rail{position:static}}
+.brand{font:800 34px/1 var(--display);letter-spacing:-.02em;margin:0}
+.brand span{color:var(--petrol)}
+.tag{color:var(--steel);margin:8px 0 26px;max-width:28ch}
+.field{margin-bottom:18px}
+.field>label,.field>span.lbl{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+input[type=text],input[type=number]{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font:inherit}
+input[type=text]:hover,input[type=number]:hover{border-color:var(--steel)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--line);border-radius:6px;overflow:hidden;background:var(--paper)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{margin:0;text-align:center;padding:10px 4px;cursor:pointer;font-size:14px;font-weight:500;border-right:1.5px solid var(--line);text-transform:capitalize}
+.seg label:last-of-type{border-right:0}
+.seg input:checked+label{background:var(--ink);color:#fff}
+.seg input:focus-visible+label{outline:3px solid var(--petrol);outline-offset:-3px}
+.sw{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;cursor:pointer}
+.sw input{position:absolute;opacity:0}
+.sw .track{flex:none;width:40px;height:24px;border-radius:99px;background:var(--line);position:relative;transition:background .15s;margin-top:1px}
+.sw .track::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(15,27,38,.35);transition:transform .15s}
+.sw input:checked+.track{background:var(--petrol)}
+.sw input:checked+.track::after{transform:translateX(16px)}
+.sw input:focus-visible+.track{outline:3px solid var(--petrol);outline-offset:2px}
+.sw b{display:block;font-weight:600;font-size:14px;line-height:1.3}.sw small{color:var(--steel);font-size:13px;line-height:1.3;display:block}
+details{border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+details .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;align-items:end}
+details .grid .wide{grid-column:1/-1}
+details label{font-size:13px;color:var(--steel);display:block;margin-bottom:4px}
+details .hint{font-size:13px;color:var(--steel);margin:10px 0 0}
+.go{width:100%;margin-top:20px;padding:14px 16px;border:0;border-radius:6px;background:var(--petrol);color:#fff;font:700 16px var(--text);cursor:pointer;transition:background .15s}
+.go:hover{background:#0a4747}.go:disabled{background:var(--steel);cursor:progress}
+.err{margin-top:12px;padding:10px 12px;border-radius:6px;background:var(--red-soft);color:#7d1f18;font-size:14px;font-weight:500}
+
+/* ---------- result column ---------- */
+.stage{min-width:0}
+.hero{display:grid;grid-template-columns:minmax(260px,400px) minmax(0,1fr);gap:36px;align-items:center;padding-bottom:36px;border-bottom:1px solid var(--line)}
+@media(max-width:700px){.hero{grid-template-columns:1fr}}
+.dial{background:var(--paper);border:1.5px solid var(--ink);border-radius:18px;padding:18px 18px 14px;position:relative}
+.dial svg{display:block;width:100%;height:auto;overflow:visible}
+.dial .zone-key{display:flex;justify-content:space-between;font-size:12px;color:var(--steel);margin-top:2px;padding:0 4px}
+.dial .zone-key i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:baseline}
+#needle{transform-origin:150px 160px;transition:transform 1.5s cubic-bezier(.2,1.25,.35,1)}
+.idle #needle{opacity:.25}
+@media(prefers-reduced-motion:reduce){#needle{transition:none}}
+.read-n{font:800 46px/1 var(--display);letter-spacing:-.02em;fill:var(--ink)}
+.read-l{font:500 11.5px var(--text);fill:var(--steel)}
+.tickl{font:500 10px var(--text);fill:var(--steel)}
+h1.headline{font:800 clamp(28px,3.6vw,44px)/1.08 var(--display);letter-spacing:-.025em;margin:0 0 14px;text-wrap:balance}
+.lede{color:var(--steel);margin:0 0 22px;max-width:52ch}
+.src{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:18px}
+.src i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.src.live{background:var(--petrol-soft);color:var(--petrol)}.src.sim{background:var(--amber-soft);color:#7a5200}.src.off{background:var(--red-soft);color:#8a2018}
+dl.facts{display:grid;grid-template-columns:repeat(2,max-content);gap:16px 44px;margin:0}
+dl.facts .fact{display:flex;flex-direction:column-reverse;white-space:nowrap}
+dl.facts dt{font-size:13px;color:var(--steel)}
+dl.facts dd{margin:0;font:700 24px/1.15 var(--display)}
+
+section.blk{padding:34px 0;border-bottom:1px solid var(--line)}
+section.blk:last-of-type{border-bottom:0}
+section.blk>h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:0 0 4px}
+section.blk>p.sub{margin:0 0 22px;color:var(--steel);max-width:62ch}
+.hidden{display:none!important}
+
+/* parts: claimed vs weather adjusted */
+.part{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 20px;padding:16px 0;border-top:1px solid var(--line)}
+.part:first-of-type{border-top:0;padding-top:4px}
+.part h3{margin:0;font:700 19px/1.25 var(--display)}
+.part .price{font:700 19px var(--display);text-align:right;white-space:nowrap}
+.part .meta{color:var(--steel);font-size:14px;grid-column:1/-1}
+.badge{display:inline-block;font:600 12px var(--text);padding:2px 8px;border-radius:4px;background:var(--ink);color:#fff;margin-left:8px;vertical-align:3px}
+.bars{grid-column:1/-1;margin-top:10px;display:grid;gap:5px}
+.bar{display:grid;grid-template-columns:92px minmax(0,1fr) 62px;align-items:center;gap:10px;font-size:13px;color:var(--steel)}
+.bar .t{height:10px;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+.bar .f{position:absolute;inset:0 auto 0 0;border-radius:2px}
+.bar.claimed .f{background:#9AA7B5}.bar.adj .f.up{background:var(--petrol)}.bar.adj .f.down{background:var(--amber)}
+.bar b{color:var(--ink);text-align:right;font-weight:600}
+.part a{grid-column:1/-1;margin-top:8px;justify-self:start;color:var(--petrol);font-weight:600;text-underline-offset:3px}
+.total{display:flex;flex-wrap:wrap;gap:6px 32px;margin-bottom:12px}
+.total div{font-size:13px;color:var(--steel)}.total b{display:block;font:700 26px/1.1 var(--display);color:var(--ink)}
+.warn{padding:12px 14px;border-radius:6px;background:var(--amber-soft);color:#6b4700;font-weight:500;margin-bottom:18px}
+
+/* timeline */
+.tl-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.tog{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer}
+.tog input{width:16px;height:16px;accent-color:var(--petrol)}
+.counts{display:flex;flex-wrap:wrap;gap:6px 30px;margin:4px 0 20px}
+.counts div{font-size:13px;color:var(--steel)}.counts b{display:block;font:700 26px/1.1 var(--display);color:var(--ink)}
+ol.tl{list-style:none;margin:0;padding:0;position:relative}
+ol.tl::before{content:"";position:absolute;left:62px;top:8px;bottom:8px;width:2px;background:var(--line)}
+ol.tl li{display:grid;grid-template-columns:48px 28px minmax(0,1fr);gap:0 0;padding:7px 0;position:relative}
+ol.tl .tk{font:600 13px/1.6 var(--text);color:var(--steel);font-variant-numeric:tabular-nums;text-align:right;padding-right:10px}
+ol.tl .dot{width:12px;height:12px;border-radius:50%;background:var(--steel);margin:6px 0 0 6px;box-shadow:0 0 0 4px var(--mist)}
+ol.tl .tx b{font-weight:600}.tx small{display:block;color:var(--steel);font-size:13.5px;line-height:1.45}
+ol.tl li.ev .dot{background:var(--red)}ol.tl li.ev .tx{background:var(--red-soft);padding:8px 12px;border-radius:6px;margin-bottom:2px}
+ol.tl li.ad .dot{background:var(--petrol)}ol.tl li.dr .dot{background:var(--amber)}ol.tl li.ok .dot{background:var(--petrol);box-shadow:0 0 0 4px var(--mist),inset 0 0 0 3px #fff}
+ol.tl li.mn{opacity:.78}ol.tl li.mn .dot{width:8px;height:8px;margin:8px 0 0 8px}ol.tl li.mn .tx{font-size:14px;color:var(--steel)}
+.goals{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.goal{padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-size:14px}
+.goal b{display:block;font-weight:600}.goal span{color:var(--steel);font-size:13px}
+
+ul.rej{list-style:none;margin:0;padding:0}
+ul.rej li{padding:11px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:4px 20px}
+ul.rej li:first-child{border-top:0}
+ul.rej b{font-weight:600}ul.rej span{color:var(--steel)}
+@media(max-width:600px){ul.rej li{grid-template-columns:1fr}}
+.fine{color:var(--steel);font-size:13px;margin:26px 0 0;max-width:70ch}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <h1 class="brand">Tune<span>Gen</span></h1>
+    <p class="tag">Weather aware tuning advice for the Maruti Suzuki Swift.</p>
+
+    <form id="f" novalidate>
+      <div class="field"><label for="city">City</label>
+        <input id="city" type="text" list="cl" value="Chennai" maxlength="60" autocomplete="off"><datalist id="cl"></datalist></div>
+      <div class="field"><label for="budget">Budget in rupees</label>
+        <input id="budget" type="number" min="1" value="20000" inputmode="numeric"></div>
+      <div class="field"><span class="lbl" id="gl">What matters most</span>
+        <div class="seg" role="radiogroup" aria-labelledby="gl">
+          <input type="radio" name="goal" id="g1" value="balanced" checked><label for="g1">balanced</label>
+          <input type="radio" name="goal" id="g2" value="performance"><label for="g2">power</label>
+          <input type="radio" name="goal" id="g3" value="mileage"><label for="g3">mileage</label>
+        </div></div>
+
+      <label class="sw"><input type="checkbox" id="warranty"><span class="track"></span><span><b>Car is under warranty</b><small>Excludes parts that could void it</small></span></label>
+      <label class="sw"><input type="checkbox" id="demo" checked><span class="track"></span><span><b>Demo weather</b><small>Simulated, works without internet. Turn off for real weather.</small></span></label>
+      <label class="sw" id="outl"><input type="checkbox" id="outage"><span class="track"></span><span><b>Break the weather service</b><small>See how the agent recovers</small></span></label>
+
+      <details open><summary>Surprises during the run</summary>
+        <div class="grid">
+          <div><label for="wt">Warranty news at step</label><input id="wt" type="number" min="1" max="60" value="5"></div>
+          <div><label for="bt">Budget change at step</label><input id="bt" type="number" min="1" max="60" value="8"></div>
+          <div class="wide"><label for="nb">New budget in rupees</label><input id="nb" type="number" min="1" value="8000"></div>
+        </div>
+        <p class="hint">Clear a step to skip that surprise.</p>
+      </details>
+
+      <button class="go" id="go" type="submit">Run agent</button>
+      <div id="err" class="err hidden" role="alert"></div>
+    </form>
+  </aside>
+
+  <main class="stage idle" id="stage" aria-live="polite">
+    <div class="hero">
+      <div class="dial">
+        <svg id="gauge" viewBox="-14 -12 328 256" role="img" aria-label="Air density gauge"></svg>
+        <div class="zone-key"><span><i style="background:var(--amber)"></i>Thin</span><span><i style="background:#9AA7B5"></i>Normal</span><span><i style="background:var(--petrol)"></i>Dense</span></div>
+      </div>
+      <div>
+        <div id="src" class="src hidden"></div>
+        <h1 class="headline" id="headline">Pick a city and run the agent.</h1>
+        <p class="lede" id="lede">Power from a naturally aspirated engine follows air density. TuneGen reads today's weather, works out the density, and only recommends parts that suit it.</p>
+        <dl class="facts hidden" id="facts"></dl>
+      </div>
+    </div>
+
+    <div id="results" class="hidden">
+      <section class="blk">
+        <h2>What to buy</h2>
+        <p class="sub" id="recsub"></p>
+        <div id="rec"></div>
+      </section>
+
+      <section class="blk">
+        <div class="tl-head">
+          <div><h2>How the agent got there</h2>
+          <p class="sub" style="margin-bottom:0">Each line is something the agent knew, wanted or did, in order.</p></div>
+          <label class="tog"><input type="checkbox" id="allsteps"> Show every step</label>
+        </div>
+        <div class="counts" id="counts"></div>
+        <ol class="tl" id="tl"></ol>
+        <div class="goals" id="goals"></div>
+      </section>
+
+      <section class="blk">
+        <h2>Left out, and why</h2>
+        <p class="sub">These failed a hard rule before any scoring happened.</p>
+        <ul class="rej" id="rej"></ul>
+      </section>
+      <p class="fine">Part specs are sample data for demonstration. Buy links open a marketplace search, not a verified listing.</p>
+    </div>
+  </main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr=n=>"₹"+Number(n).toLocaleString("en-IN");
+const MIN=0.70,MAX=1.05,CX=150,CY=160,R=120;
+const frac=v=>Math.min(1,Math.max(0,(v-MIN)/(MAX-MIN)));
+const pt=(f,r)=>{const t=Math.PI+f*Math.PI;return[CX+r*Math.cos(t),CY+r*Math.sin(t)]};
+const arc=(f1,f2,r)=>{const[a,b]=pt(f1,r),[c,d]=pt(f2,r);return`M${a.toFixed(2)} ${b.toFixed(2)}A${r} ${r} 0 0 1 ${c.toFixed(2)} ${d.toFixed(2)}`};
+let lastData=null;
+
+function drawGauge(){
+  let s=`<path d="${arc(0,1,R)}" stroke="#E3E8ED" stroke-width="22" fill="none"/>`;
+  [[0,frac(.85),"#E8A317"],[frac(.85),frac(.95),"#9AA7B5"],[frac(.95),1,"#0E5A5A"]].forEach(([a,b,c])=>{s+=`<path d="${arc(a+.004,b-.004,R)}" stroke="${c}" stroke-width="22" fill="none"/>`});
+  for(let v=0.70;v<=1.0501;v+=0.05){const f=frac(v),[x1,y1]=pt(f,R+14),[x2,y2]=pt(f,R+20),[tx,ty]=pt(f,R+33);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#5B6B7F" stroke-width="1.5"/><text class="tickl" x="${tx}" y="${ty+3}" text-anchor="middle">${v.toFixed(2)}</text>`}
+  s+=`<text class="read-n" id="readn" x="150" y="214" text-anchor="middle">—</text><text class="read-l" x="150" y="234" text-anchor="middle">air density vs sea level</text>`;
+  s+=`<g id="needle" style="transform:rotate(90deg)"><path d="M${CX-R+14} ${CY}L${CX+6} ${CY-3}L${CX+6} ${CY+3}Z" fill="#0F1B26" transform="translate(0,0)"/><circle cx="${CX}" cy="${CY}" r="8" fill="#0F1B26"/><circle cx="${CX}" cy="${CY}" r="3" fill="#FAFBFC"/></g>`;
+  $("gauge").innerHTML=s;
+}
+function setNeedle(v){
+  const f=frac(v);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{$("needle").style.transform=`rotate(${(f*180).toFixed(1)}deg)`}));
+  const el=$("readn");const t0=performance.now(),dur=matchMedia("(prefers-reduced-motion: reduce)").matches?0:1400;
+  (function tick(now){const p=dur?Math.min(1,(now-t0)/dur):1;el.textContent=(v*p).toFixed(3);if(p<1)requestAnimationFrame(tick)})(t0);
+}
+drawGauge();
+
+fetch("/api/cities").then(r=>r.json()).then(c=>{$("cl").innerHTML=c.map(x=>`<option value="${esc(x)}">`).join("")}).catch(()=>{});
+$("demo").onchange=()=>{$("outl").classList.toggle("hidden",!$("demo").checked);if(!$("demo").checked)$("outage").checked=false};
+
+$("f").onsubmit=async e=>{
+  e.preventDefault();
+  const b=$("go"),er=$("err");er.classList.add("hidden");b.disabled=true;b.textContent="Agent is working";
+  const body={city:$("city").value,budget:$("budget").value,goal:document.querySelector("[name=goal]:checked").value,warranty:$("warranty").checked,
+    demo:$("demo").checked,outage:$("outage").checked&&$("demo").checked,warranty_tick:$("wt").value,budget_tick:$("bt").value,new_budget:$("nb").value};
+  try{
+    const r=await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||"The request failed");
+    lastData=d;render(d);
+  }catch(x){er.textContent=x.message+". Check the values and run again.";er.classList.remove("hidden")}
+  b.disabled=false;b.textContent="Run agent";
+};
+$("allsteps").onchange=()=>lastData&&renderTimeline(lastData);
+
+const HEAD={R_WET:c=>`Rain in ${c}. Open air intakes are out.`,R_HOT:c=>`${c} is hot. Aggressive ECU tunes are out.`,
+  R_THIN_AIR:c=>`Thin air in ${c}. Airflow parts help less.`,R_IDEAL:c=>`Cool, dense air in ${c}. Airflow parts work at full strength.`};
+function render(d){
+  const rec=d.recommendation,o=d.observation;
+  if(!rec||!o){$("headline").textContent="Nothing could be recommended.";$("lede").textContent="No part passed the rules for these conditions. Try a larger budget.";return}
+  $("stage").classList.remove("idle");$("results").classList.remove("hidden");
+  const fired=rec.fired_rules;
+  $("headline").textContent=fired.length?fired.slice(0,2).map(id=>(HEAD[id]||(()=>id))(o.city)).join(" "):`Mild conditions in ${o.city}. No adaptation was needed.`;
+  $("lede").textContent=rec.advice.length?rec.advice.join(" "):"Weather is close to normal, so parts keep their listed gains.";
+  const k=rec.data_source==="LIVE"?["live","Live weather"]:rec.data_source==="SIMULATED"?["sim","Simulated weather"]:["off","No live data, typical climate"];
+  $("src").className="src "+k[0];$("src").innerHTML=`<i></i>${k[1]}, ${esc(rec.confidence.split(" (")[0])} confidence`;
+  $("facts").classList.remove("hidden");
+  $("facts").innerHTML=[[o.temp_c.toFixed(0)+"°C","Temperature"],[o.humidity_pct.toFixed(0)+"%","Humidity"],[o.precip_mm.toFixed(1)+" mm","Rain now"],[o.pressure_hpa.toFixed(0)+" hPa","Pressure"]]
+    .map(([v,l])=>`<div class="fact"><dt>${l}</dt><dd>${esc(v)}</dd></div>`).join("");
+  setNeedle(o.density_ratio);
+
+  const maxHp=Math.max(1,...rec.bundle.map(p=>Math.max(p.claimed_gain_hp,p.adj_gain_hp)));
+  $("recsub").textContent=`Best combination under ${inr(d.final_budget)}, one part per category. The top scorer alone is ${rec.best_single}.`;
+  $("rec").innerHTML=(d.warranty_active?`<div class="warn">The car is under warranty, so parts that could void it were left out.</div>`:"")+
+    (rec.bundle.length?`<div class="total"><div><b>${inr(rec.total_price_inr)}</b>total cost</div><div><b>${rec.total_adj_gain_hp} hp</b>expected gain in today's air</div></div>`+
+    rec.bundle.map(p=>{const up=p.adj_gain_hp>=p.claimed_gain_hp;return`<article class="part">
+      <h3>${esc(p.name)}${p.name===rec.best_single?'<span class="badge">Top scorer</span>':""}</h3><div class="price">${inr(p.price_inr)}</div>
+      <div class="meta">${esc(p.category)}, utility score ${p.utility}</div>
+      <div class="bars"><div class="bar claimed"><span>Listed gain</span><div class="t"><div class="f" style="width:${p.claimed_gain_hp/maxHp*100}%"></div></div><b>${p.claimed_gain_hp} hp</b></div>
+      <div class="bar adj"><span>In today's air</span><div class="t"><div class="f ${up?"up":"down"}" style="width:${p.adj_gain_hp/maxHp*100}%"></div></div><b>${p.adj_gain_hp} hp</b></div></div>
+      <a href="${esc(p.search_link)}" target="_blank" rel="noopener noreferrer">Find on Amazon.in</a></article>`}).join(""):
+    `<p>Nothing affordable is allowed under these conditions. Raise the budget or change the goal.</p>`);
+  renderTimeline(d);
+  $("goals").innerHTML=d.desires.map(g=>`<div class="goal"><b>${esc(g.description)}</b><span>Priority ${g.priority}, ${esc(g.status.toLowerCase())}</span></div>`).join("");
+  $("rej").innerHTML=rec.rejected.map(([n,w])=>`<li><b>${esc(n)}</b><span>${esc(nice(w))}</span></li>`).join("")||"<li><span>Nothing was excluded.</span></li>";
+}
+const surprise=t=>t.key==="warranty_active"?(t.new?"The car is under warranty":"The warranty no longer applies"):t.key==="budget_inr"?`Budget changed from ${inr(t.old)} to ${inr(t.new)}`:`${String(t.key).replace(/_/g," ")} changed`;
+const nice=s=>String(s).replace("assumptions broken: budget_inr changed","the budget changed").replace("assumptions broken:","something the plan relied on changed:")
+  .replace(/[\[\]']/g,"").replace(/_/g," ").replace(/\bdesire\b/g,"goal");
+function renderTimeline(d){
+  const all=$("allsteps").checked,tr=d.trace;
+  const n=ev=>tr.filter(t=>t.event===ev).length;
+  $("counts").innerHTML=`<div><b>${tr.filter(t=>t.kind==="EVENT").length}</b>surprises hit</div><div><b>${n("adopt")}</b>plans made</div><div><b>${n("abandon")+n("step_failed")}</b>plans dropped</div><div><b>${tr.at(-1).tick}</b>steps taken</div>`;
+  const rows=[];
+  tr.forEach(t=>{
+    let cls="mn",html=esc(t.msg),key=false;
+    if(t.kind==="EVENT"){cls="ev";key=true;html=`<b>Surprise:</b> ${esc(surprise(t))}`}
+    else if(t.event==="adopt"){cls="ad";key=true;const st=t.msg.split(": ").slice(1).join(": ").split(" > ").join(", ");html=`<b>Plan chosen:</b> ${esc(t.plan.replace(/_/g," "))}<small>${esc(st)}</small>`}
+    else if(t.event==="abandon"||t.event==="step_failed"){cls="dr";key=true;html=`<b>Plan dropped:</b> ${esc(t.plan.replace(/_/g," "))}<small>${esc(nice(t.reason))}</small>`}
+    else if(t.event==="complete"){cls="ok";key=true;html=`<b>Plan finished:</b> ${esc(t.plan.replace(/_/g," "))}`}
+    else if(t.kind==="DONE"){cls="ok";key=true;html="<b>All goals met</b>"}
+    if(key||all)rows.push(`<li class="${cls}"><span class="tk">${t.tick}</span><span></span><div class="tx">${html}</div></li>`.replace("<span></span>",'<span class="dot"></span>'));
+  });
+  $("tl").innerHTML=rows.join("");
+}
+</script>
+</body>
+</html>

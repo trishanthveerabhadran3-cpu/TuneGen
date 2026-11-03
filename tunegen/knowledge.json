@@ -1,0 +1,63 @@
+{
+  "meta": {"name": "TuneGen knowledge base", "version": "1.0",
+           "note": "Part specs (hp gain, price, ratings) are ILLUSTRATIVE sample data, not verified market data."},
+  "vehicle": {"id": "swift_k12", "name": "Maruti Suzuki Swift K12", "aspiration": "naturally_aspirated"},
+  "search_link_template": "https://www.amazon.in/s?k={q}",
+
+  "cities": {
+    "Bengaluru": {"lat": 12.9716, "lon": 77.5946, "typical": {"temp_c": 24, "humidity_pct": 65, "precip_mm": 0, "pressure_hpa": 910}},
+    "Delhi":     {"lat": 28.6139, "lon": 77.2090, "typical": {"temp_c": 32, "humidity_pct": 40, "precip_mm": 0, "pressure_hpa": 990}},
+    "Chennai":   {"lat": 13.0827, "lon": 80.2707, "typical": {"temp_c": 31, "humidity_pct": 75, "precip_mm": 0, "pressure_hpa": 1008}},
+    "Shimla":    {"lat": 31.1048, "lon": 77.1734, "typical": {"temp_c": 14, "humidity_pct": 60, "precip_mm": 0, "pressure_hpa": 790}}
+  },
+
+  "goal_weights": {
+    "performance": {"perf": 0.35, "eff": 0.05, "cost": 0.20, "rel": 0.15, "trust": 0.15, "deliv": 0.10},
+    "mileage":     {"perf": 0.05, "eff": 0.35, "cost": 0.20, "rel": 0.15, "trust": 0.15, "deliv": 0.10},
+    "balanced":    {"perf": 0.20, "eff": 0.20, "cost": 0.20, "rel": 0.15, "trust": 0.15, "deliv": 0.10}
+  },
+  "utility": {"risk_lambda": 0.15, "max_delivery_days": 14},
+
+  "wmo_weather_codes": {
+    "clear": [0, 1], "cloudy": [2, 3], "fog": [45, 48],
+    "rain": [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82],
+    "thunderstorm": [95, 96, 99], "snow": [71, 73, 75, 77, 85, 86]
+  },
+
+  "relations": [
+    {"subject": "high_intake_air_temperature", "predicate": "reduces", "object": "air_density"},
+    {"subject": "high_altitude", "predicate": "reduces", "object": "air_density"},
+    {"subject": "air_density", "predicate": "limits", "object": "naturally_aspirated_power"},
+    {"subject": "high_intake_air_temperature", "predicate": "increases", "object": "knock_risk"},
+    {"subject": "knock_risk", "predicate": "penalises", "object": "aggressive_timing"},
+    {"subject": "rain", "predicate": "triggers", "object": "water_ingestion_risk"}
+  ],
+
+  "parts": [
+    {"id": "cai_a", "name": "Cold Air Intake A", "category": "intake", "price_inr": 6500, "hp_gain": 4.0, "mileage_gain": 2.0, "reliability": 4.2, "seller_rating": 4.5, "delivery_days": 3, "warranty_risk": 0.10, "aggressiveness": 0.2, "tags": ["airflow", "heat_sensitive", "water_ingestion_risk"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "cai_b", "name": "Cold Air Intake B (sealed airbox)", "category": "intake", "price_inr": 4200, "hp_gain": 2.5, "mileage_gain": 1.5, "reliability": 3.8, "seller_rating": 4.0, "delivery_days": 5, "warranty_risk": 0.05, "aggressiveness": 0.1, "tags": ["airflow", "heat_sensitive"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "exh_x", "name": "Cat-back Exhaust X", "category": "exhaust", "price_inr": 14500, "hp_gain": 6.0, "mileage_gain": 0.5, "reliability": 4.0, "seller_rating": 4.3, "delivery_days": 7, "warranty_risk": 0.30, "aggressiveness": 0.3, "tags": ["airflow"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "exh_y", "name": "Free-flow Exhaust Y", "category": "exhaust", "price_inr": 9800, "hp_gain": 3.5, "mileage_gain": 0.8, "reliability": 3.5, "seller_rating": 3.9, "delivery_days": 4, "warranty_risk": 0.20, "aggressiveness": 0.2, "tags": ["airflow"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "piggy", "name": "Piggyback ECU Chip", "category": "ecu", "price_inr": 18000, "hp_gain": 9.0, "mileage_gain": 5.0, "reliability": 3.2, "seller_rating": 3.5, "delivery_days": 10, "warranty_risk": 0.70, "aggressiveness": 0.9, "tags": ["aggressive_timing"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "tuner", "name": "Plug-in Tuner Module", "category": "ecu", "price_inr": 11000, "hp_gain": 5.5, "mileage_gain": 4.0, "reliability": 4.1, "seller_rating": 4.4, "delivery_days": 2, "warranty_risk": 0.35, "aggressiveness": 0.5, "tags": ["aggressive_timing"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "plugs", "name": "Iridium Spark Plugs", "category": "ignition", "price_inr": 2400, "hp_gain": 1.5, "mileage_gain": 2.5, "reliability": 4.6, "seller_rating": 4.7, "delivery_days": 2, "warranty_risk": 0.02, "aggressiveness": 0.1, "tags": ["ignition"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "filter", "name": "Performance Air Filter", "category": "filter", "price_inr": 2800, "hp_gain": 2.0, "mileage_gain": 1.8, "reliability": 4.4, "seller_rating": 4.6, "delivery_days": 2, "warranty_risk": 0.03, "aggressiveness": 0.1, "tags": ["airflow"], "fits": ["swift_k12"], "bs6_legal": true},
+    {"id": "race", "name": "Race ECU Remap (not BS6)", "category": "ecu", "price_inr": 16000, "hp_gain": 11.0, "mileage_gain": 3.0, "reliability": 3.0, "seller_rating": 3.8, "delivery_days": 6, "warranty_risk": 0.80, "aggressiveness": 1.0, "tags": ["aggressive_timing"], "fits": ["swift_k12"], "bs6_legal": false},
+    {"id": "city_intake", "name": "Intake for Honda City", "category": "intake", "price_inr": 5000, "hp_gain": 3.0, "mileage_gain": 1.0, "reliability": 4.0, "seller_rating": 4.2, "delivery_days": 3, "warranty_risk": 0.05, "aggressiveness": 0.1, "tags": ["airflow"], "fits": ["honda_city"], "bs6_legal": true}
+  ],
+
+  "rules": [
+    {"id": "R_HOT", "when": {"all": [{"metric": "air_temp_c", "op": ">=", "value": 35}]},
+     "then": {"max_aggressiveness": 0.40, "part_multipliers": {"heat_sensitive": 0.60, "aggressive_timing": 0.50},
+              "advice": "Intake air is very hot: airflow gains shrink and knock risk rises. Aggressive ECU tunes are excluded."}},
+    {"id": "R_WET", "when": {"any": [{"metric": "is_raining", "op": ">=", "value": 1}, {"metric": "precip_mm", "op": ">=", "value": 1.0}, {"metric": "humidity_pct", "op": ">=", "value": 90}]},
+     "then": {"avoid_tags": ["water_ingestion_risk"],
+              "advice": "Rain or waterlogging: open element intakes risk water ingestion and are removed from the plan."}},
+    {"id": "R_THIN_AIR", "when": {"all": [{"metric": "density_ratio", "op": "<=", "value": 0.85}]},
+     "then": {"max_aggressiveness": 0.55, "part_multipliers": {"airflow": 0.80, "aggressive_timing": 1.10},
+              "advice": "Thin air (altitude or heat): a naturally aspirated engine loses power, bolt on airflow parts help less, ECU corrections help more."}},
+    {"id": "R_IDEAL", "when": {"all": [{"metric": "air_temp_c", "op": "<=", "value": 24}, {"metric": "is_raining", "op": "<", "value": 1}, {"metric": "precip_mm", "op": "<", "value": 0.1}, {"metric": "density_ratio", "op": ">=", "value": 0.88}]},
+     "then": {"max_aggressiveness": 0.85, "part_multipliers": {"airflow": 1.15},
+              "advice": "Cool, dry, dense air: airflow parts deliver close to their full claimed gain."}}
+  ]
+}
